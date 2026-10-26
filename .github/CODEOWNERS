@@ -1,0 +1,5 @@
+* @wilfriedaigner
+/.github/CODEOWNERS @wilfriedaigner
+/.github/workflows/owner-authorization.yml @wilfriedaigner
+/docs/AGENTEN_CHARTA.md @wilfriedaigner
+/docs/ROLE_MATRIX.md @wilfriedaigner
