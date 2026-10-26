@@ -1,0 +1,26 @@
+name: PHEREKLIS owner authorization
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+jobs:
+  governance-owner-authorization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify personal SHA-bound authorization
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner, repo = context.repo.repo;
+            const pull_number = context.payload.pull_request.number;
+            const { data: pr } = await github.rest.pulls.get({owner, repo, pull_number});
+            if (pr.base.ref !== 'main') { core.setFailed('Wrong base'); return; }
+            const expected = '/approve-phereklis-governance ' + pr.head.sha;
+            const comments = await github.paginate(github.rest.issues.listComments, {owner, repo, issue_number: pull_number, per_page: 100});
+            const approved = comments.some(c => c.user?.login === 'wilfriedaigner' && c.body?.trim() === expected);
+            if (!approved) core.setFailed('Missing owner comment: ' + expected);
+            else core.info('Verified owner approval for ' + pr.head.sha);
